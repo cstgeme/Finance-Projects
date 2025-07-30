@@ -1,0 +1,109 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "4d05fa41-7e66-43f4-9d48-fa70bd9825c7",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdin",
+     "output_type": "stream",
+     "text": [
+      "What is the stock ticker? WMT\n",
+      "What is the discount rate? Enter as decimal 0.0525\n",
+      "How many forecasted dividends are there? 5\n",
+      "What is the dividend for the 2025 fiscal year? 0.91\n",
+      "What is the dividend for the 2026 fiscal year? 1.05\n",
+      "What is the dividend for the 2027 fiscal year? 1.30\n",
+      "What is the dividend for the 2028 fiscal year? 1.55\n",
+      "What is the dividend for the 2029 fiscal year? 1.82\n",
+      "What is the terminal growth rate? Enter as decimal 0.035\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "The intrinsic value of WMT is $91.08\n",
+      "The current price of WMT is $97.60\n",
+      "I'd recommend selling the stock\n"
+     ]
+    }
+   ],
+   "source": [
+    "import yfinance as yf\n",
+    "from datetime import date\n",
+    "\n",
+    "def yearfrac(endDate):\n",
+    "    today = date.today()\n",
+    "    return ((endDate-today).days) / 365\n",
+    "\n",
+    "def getStockPrice(ticker):\n",
+    "    ticker = yf.Ticker(ticker)\n",
+    "    return round(ticker.fast_info['last_price'],2)\n",
+    "\n",
+    "def dividendDiscountModel():\n",
+    "    ticker = input(\"What is the stock ticker?\")\n",
+    "    discount = float(input(\"What is the discount rate? Enter as decimal\"))\n",
+    "    numDiv = int(input(\"How many forecasted dividends are there?\"))\n",
+    "    forecastDividends = []\n",
+    "    for i in range(0,numDiv):\n",
+    "        div = float(input(\"What is the dividend for the \" + str(2025+i)+ \" fiscal year?\"))\n",
+    "        forecastDividends.append(div)\n",
+    "    termGrowth = float(input(\"What is the terminal growth rate? Enter as decimal\"))\n",
+    "    if discount < termGrowth:\n",
+    "        print(\"Error: Discount Rate must be greater than Terminal Growth Rate\")\n",
+    "        return\n",
+    "    value = 0\n",
+    "    forecastDividends[0] = yearfrac(date(2025,12,31))*forecastDividends[0]\n",
+    "    for i in range(0,len(forecastDividends)):\n",
+    "        value += forecastDividends[i]/(1+discount)**yearfrac(date(2025+i,12,31))\n",
+    "    terminalDiv = forecastDividends[-1]*(1+termGrowth)\n",
+    "    perpetuity = terminalDiv / (discount-termGrowth)\n",
+    "    discountedPerpetuity = perpetuity / (1 + discount) ** yearfrac(date(2025+len(forecastDividends)-1,12,31))\n",
+    "    value+=discountedPerpetuity\n",
+    "    print(f\"The intrinsic value of {ticker} is ${value:.2f}\")\n",
+    "    price = getStockPrice(ticker)\n",
+    "    print(f\"The current price of {ticker} is ${price:.2f}\")\n",
+    "    if(value > 1.05*price):\n",
+    "        print(\"I'd recommend buying the stock\")\n",
+    "    elif(value < 0.95*price):\n",
+    "        print(\"I'd recommend selling the stock\")\n",
+    "    else:\n",
+    "        print(\"I'd recommend holding the stock\")\n",
+    "\n",
+    "dividendDiscountModel()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "848a652e-5293-4ded-8a27-10c73fa5f91d",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python [conda env:base] *",
+   "language": "python",
+   "name": "conda-base-py"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.13.5"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

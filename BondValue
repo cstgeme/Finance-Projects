@@ -1,0 +1,104 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "dd730f25-0456-4b57-b6bd-89ef928ade00",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdin",
+     "output_type": "stream",
+     "text": [
+      "What is the coupon rate? in % APR 8\n",
+      "What is the length of bond? in years 5\n",
+      "What is the yield to maturity? in % APR 6\n",
+      "What is the par value? (default = 1000) \n",
+      "What are the compounding periods per year? (default = 2) \n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Bond Price: $1085.30\n",
+      "Macaulay Duration: 4.2543\n",
+      "Modified Duration: 4.1304\n"
+     ]
+    }
+   ],
+   "source": [
+    "def bondValue():\n",
+    "    cprate=float(input(\"What is the coupon rate? in % APR\"))/100\n",
+    "    ttm = int(input(\"What is the length of bond? in years\"))\n",
+    "    ytm = float(input(\"What is the yield to maturity? in % APR\"))/100\n",
+    "    par = input(\"What is the par value? (default = 1000)\")\n",
+    "    parValue = 0\n",
+    "    if par == \"\":\n",
+    "        parValue = 1000\n",
+    "    else:\n",
+    "        parValue = int(par)\n",
+    "    period = input(\"What are the compounding periods per year? (default = 2)\")\n",
+    "    freq = 0\n",
+    "    if period == \"\":\n",
+    "        freq = 2\n",
+    "    else:\n",
+    "        freq = int(period)\n",
+    "    percprate = cprate/freq\n",
+    "    percppmt = percprate * parValue\n",
+    "    perttm = ttm * freq\n",
+    "    perytm = ytm / freq\n",
+    "    cf = []\n",
+    "    for i in range(perttm):\n",
+    "        if(i==(perttm-1)):\n",
+    "            cf.append(percppmt+parValue)\n",
+    "        else:\n",
+    "            cf.append(percppmt)\n",
+    "    discountedCF=[]\n",
+    "    for i in range(perttm):\n",
+    "        discountedCF.append(cf[i]/(1+perytm)**(i+1))\n",
+    "    bondValue = sum(discountedCF)\n",
+    "    tPVCFValue = []\n",
+    "    tPVCF = 0\n",
+    "    for i,cf in enumerate(discountedCF):\n",
+    "        tPVCF = (i+1) * cf\n",
+    "        tPVCFValue.append(tPVCF/bondValue)\n",
+    "    macaulayD = sum(tPVCFValue) / freq\n",
+    "    modifiedD = macaulayD / (1+perytm)\n",
+    "    print(f\"Bond Price: ${bondValue:.2f}\")\n",
+    "    print(f\"Macaulay Duration: {macaulayD:.4f}\")\n",
+    "    print(f\"Modified Duration: {modifiedD:.4f}\")\n",
+    "bondValue()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "40271bc2-3723-4bdc-8a30-4addcac871fc",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python [conda env:base] *",
+   "language": "python",
+   "name": "conda-base-py"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.13.5"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
