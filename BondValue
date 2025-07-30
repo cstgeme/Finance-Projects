@@ -1,89 +1,41 @@
-def pv(cf,rate,periods):
-    return cf / ((1+rate)**periods)
-
-def annuity(cf0,g,discount,n):
-    return ((cf0*(1+g)) / (discount-g))*(1-(((1+g)/(1+discount))**n))
-
-def perpetuity(cf0,g,discount):
-    return (cf0*(1+g)) / (discount-g)
-
-def fv(cf,rate,periods):
-    return cf * ((1+rate)**periods)
-    
-def calculator():
-    type = input("Do you need to calculate a present of future value? (pv/fv)")
-    currentCF = 0
-    currentPV = 0
-    currentPeriod = 0
-    if type ==  "pv":
-        print("present value calculator")
-        discount = float(input("What is the discount rate? (as a decimal)"))
-        discrete = int(input("How many discrete forecast periods?"))
-        growth = int(input("How many growth phases?"))
-        for i in range(1, discrete+1):
-            currentPeriod += 1
-            cf=float(input("What is your cash flow in period " + str(currentPeriod) + "?"))
-            currentCF=cf
-            currentPV += pv(cf,discount,currentPeriod)
-        print("PV Discrete Forecast: $" + str(currentPV))
-        for i in range(1, growth +1):
-            phasePV = 0
-            if i != growth:
-                growthPeriod = int(input("How many years is the growth phase?"))
-                growthRate = float(input("What is the growth rate of the phase? (as a decimal)"))
-                value = annuity(currentCF,growthRate,discount,growthPeriod)
-                currentPV += pv(value, discount, currentPeriod)
-                phasePV += pv(value, discount, currentPeriod)
-                currentPeriod+=growthPeriod
-                for i in range(growthPeriod):
-                    currentCF *= (1+growthRate)
-                print("PV Phase " + str(i) + " Annuity: $" + str(phasePV))
-            else:
-                final = input("Is the last phase an annuity or a perpetuity?")
-                if final == "annuity":
-                    growthPeriod = int(input("How many years is the growth phase?"))
-                    growthRate = float(input("What is the growth rate of the phase? (as a decimal)"))
-                    value = annuity(currentCF,growthRate,discount,growthPeriod)
-                    currentPV += pv(value, discount, currentPeriod)
-                    phasePV += pv(value, discount, currentPeriod)
-                    currentPeriod += growthPeriod
-                    for i in range(growthPeriod):
-                        currentCF *= (1+growthRate)
-                    print("PV Phase " + str(i) + " Annuity: $" + str(phasePV))
-                if final == "perpetuity":
-                    growthRate = float(input("What is the growth rate of the perpetuity? (as a decimal)"))
-                    value = perpetuity(currentCF, growthRate, discount)
-                    currentPV += pv(value, discount, currentPeriod)
-                    phasePV += pv(value, discount, currentPeriod)
-                    print("PV Phase " + str(i) + " Perpetuity: $" + str(phasePV))
-        print("Total PV = $: " + str(currentPV))
-    elif type == "fv":
-        print("future value calculator")
-        rate = float(input("What is the interest rate? (as a decimal)"))
-        discrete = int(input("How many discrete forecast periods?"))
-        growth = int(input("How many growth periods?"))
-        currentPeriod=1
-        currentCF = 0
-        totalCF = []
-        for i in range(1, discrete+1):
-            currentCF = float(input("What is the cash flow in period " + str(i) + "?"))
-            totalCF.append(currentCF)
-            print(totalCF)
-            currentPeriod += 1
-        for i in range(1, growth +1):
-            growthPeriod = int(input("How many years is the growth phase?"))
-            growthRate = float(input("What is the growth rate of the phase? (as a decimal)"))
-            for i in range(1,growthPeriod +1):
-                currentCF *= (1+growthRate)
-                totalCF.append(currentCF)
-                currentPeriod += 1
-        futureValue = 0
-        for i in range(0,currentPeriod-1):
-            yearsCompounding = currentPeriod -1 - i
-            future = fv(totalCF[i],rate,yearsCompounding)
-            futureValue += future
-        print(f"Your future value is ${futureValue:.02f} in {currentPeriod-1} years")
+def bondValue():
+    cprate=float(input("What is the coupon rate? in % APR"))/100
+    ttm = int(input("What is the length of bond? in years"))
+    ytm = float(input("What is the yield to maturity? in % APR"))/100
+    par = input("What is the par value? (default = 1000)")
+    parValue = 0
+    if par == "":
+        parValue = 1000
     else:
-        print("Invalid input. Please try again")
-        return
-calculator()
+        parValue = int(par)
+    period = input("What are the compounding periods per year? (default = 2)")
+    freq = 0
+    if period == "":
+        freq = 2
+    else:
+        freq = int(period)
+    percprate = cprate/freq
+    percppmt = percprate * parValue
+    perttm = ttm * freq
+    perytm = ytm / freq
+    cf = []
+    for i in range(perttm):
+        if(i==(perttm-1)):
+            cf.append(percppmt+parValue)
+        else:
+            cf.append(percppmt)
+    discountedCF=[]
+    for i in range(perttm):
+        discountedCF.append(cf[i]/(1+perytm)**(i+1))
+    bondValue = sum(discountedCF)
+    tPVCFValue = []
+    tPVCF = 0
+    for i,cf in enumerate(discountedCF):
+        tPVCF = (i+1) * cf
+        tPVCFValue.append(tPVCF/bondValue)
+    macaulayD = sum(tPVCFValue) / freq
+    modifiedD = macaulayD / (1+perytm)
+    print(f"Bond Price: ${bondValue:.2f}")
+    print(f"Macaulay Duration: {macaulayD:.4f}")
+    print(f"Modified Duration: {modifiedD:.4f}")
+bondValue()
