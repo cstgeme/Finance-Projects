@@ -1,163 +1,89 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 2,
-   "id": "90c9835d-746c-405b-8cb2-77f3778fac68",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdin",
-     "output_type": "stream",
-     "text": [
-      "Do you need to calculate a present of future value? (pv/fv) pv\n"
-     ]
-    },
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "present value calculator\n"
-     ]
-    },
-    {
-     "name": "stdin",
-     "output_type": "stream",
-     "text": [
-      "What is the discount rate? (as a decimal) 0.04\n",
-      "How many discrete forecast periods? 0\n",
-      "How many growth phases? 0\n"
-     ]
-    },
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "PV Discrete Forecast: $0\n",
-      "Total PV = $: 0\n"
-     ]
-    }
-   ],
-   "source": [
-    "def pv(cf,rate,periods):\n",
-    "    return cf / ((1+rate)**periods)\n",
-    "\n",
-    "def annuity(cf0,g,discount,n):\n",
-    "    return ((cf0*(1+g)) / (discount-g))*(1-(((1+g)/(1+discount))**n))\n",
-    "\n",
-    "def perpetuity(cf0,g,discount):\n",
-    "    return (cf0*(1+g)) / (discount-g)\n",
-    "\n",
-    "def fv(cf,rate,periods):\n",
-    "    return cf * ((1+rate)**periods)\n",
-    "    \n",
-    "def calculator():\n",
-    "    type = input(\"Do you need to calculate a present of future value? (pv/fv)\")\n",
-    "    currentCF = 0\n",
-    "    currentPV = 0\n",
-    "    currentPeriod = 0\n",
-    "    if type ==  \"pv\":\n",
-    "        print(\"present value calculator\")\n",
-    "        discount = float(input(\"What is the discount rate? (as a decimal)\"))\n",
-    "        discrete = int(input(\"How many discrete forecast periods?\"))\n",
-    "        growth = int(input(\"How many growth phases?\"))\n",
-    "        for i in range(1, discrete+1):\n",
-    "            currentPeriod += 1\n",
-    "            cf=float(input(\"What is your cash flow in period \" + str(currentPeriod) + \"?\"))\n",
-    "            currentCF=cf\n",
-    "            currentPV += pv(cf,discount,currentPeriod)\n",
-    "        print(\"PV Discrete Forecast: $\" + str(currentPV))\n",
-    "        for i in range(1, growth +1):\n",
-    "            phasePV = 0\n",
-    "            if i != growth:\n",
-    "                growthPeriod = int(input(\"How many years is the growth phase?\"))\n",
-    "                growthRate = float(input(\"What is the growth rate of the phase? (as a decimal)\"))\n",
-    "                value = annuity(currentCF,growthRate,discount,growthPeriod)\n",
-    "                currentPV += pv(value, discount, currentPeriod)\n",
-    "                phasePV += pv(value, discount, currentPeriod)\n",
-    "                currentPeriod+=growthPeriod\n",
-    "                for i in range(growthPeriod):\n",
-    "                    currentCF *= (1+growthRate)\n",
-    "                print(\"PV Phase \" + str(i) + \" Annuity: $\" + str(phasePV))\n",
-    "            else:\n",
-    "                final = input(\"Is the last phase an annuity or a perpetuity?\")\n",
-    "                if final == \"annuity\":\n",
-    "                    growthPeriod = int(input(\"How many years is the growth phase?\"))\n",
-    "                    growthRate = float(input(\"What is the growth rate of the phase? (as a decimal)\"))\n",
-    "                    value = annuity(currentCF,growthRate,discount,growthPeriod)\n",
-    "                    currentPV += pv(value, discount, currentPeriod)\n",
-    "                    phasePV += pv(value, discount, currentPeriod)\n",
-    "                    currentPeriod += growthPeriod\n",
-    "                    for i in range(growthPeriod):\n",
-    "                        currentCF *= (1+growthRate)\n",
-    "                    print(\"PV Phase \" + str(i) + \" Annuity: $\" + str(phasePV))\n",
-    "                if final == \"perpetuity\":\n",
-    "                    growthRate = float(input(\"What is the growth rate of the perpetuity? (as a decimal)\"))\n",
-    "                    value = perpetuity(currentCF, growthRate, discount)\n",
-    "                    currentPV += pv(value, discount, currentPeriod)\n",
-    "                    phasePV += pv(value, discount, currentPeriod)\n",
-    "                    print(\"PV Phase \" + str(i) + \" Perpetuity: $\" + str(phasePV))\n",
-    "        print(\"Total PV = $: \" + str(currentPV))\n",
-    "    elif type == \"fv\":\n",
-    "        print(\"future value calculator\")\n",
-    "        rate = float(input(\"What is the interest rate? (as a decimal)\"))\n",
-    "        discrete = int(input(\"How many discrete forecast periods?\"))\n",
-    "        growth = int(input(\"How many growth periods?\"))\n",
-    "        currentPeriod=1\n",
-    "        currentCF = 0\n",
-    "        totalCF = []\n",
-    "        for i in range(1, discrete+1):\n",
-    "            currentCF = float(input(\"What is the cash flow in period \" + str(i) + \"?\"))\n",
-    "            totalCF.append(currentCF)\n",
-    "            print(totalCF)\n",
-    "            currentPeriod += 1\n",
-    "        for i in range(1, growth +1):\n",
-    "            growthPeriod = int(input(\"How many years is the growth phase?\"))\n",
-    "            growthRate = float(input(\"What is the growth rate of the phase? (as a decimal)\"))\n",
-    "            for i in range(1,growthPeriod +1):\n",
-    "                currentCF *= (1+growthRate)\n",
-    "                totalCF.append(currentCF)\n",
-    "                currentPeriod += 1\n",
-    "        futureValue = 0\n",
-    "        for i in range(0,currentPeriod-1):\n",
-    "            yearsCompounding = currentPeriod -1 - i\n",
-    "            future = fv(totalCF[i],rate,yearsCompounding)\n",
-    "            futureValue += future\n",
-    "        print(f\"Your future value is ${futureValue:.02f} in {currentPeriod-1} years\")\n",
-    "    else:\n",
-    "        print(\"Invalid input. Please try again\")\n",
-    "        return\n",
-    "calculator()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "1f5a5360-cd57-441f-9a64-ac6f84287d54",
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python [conda env:base] *",
-   "language": "python",
-   "name": "conda-base-py"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.13.5"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 5
-}
+def pv(cf,rate,periods):
+    return cf / ((1+rate)**periods)
+
+def annuity(cf0,g,discount,n):
+    return ((cf0*(1+g)) / (discount-g))*(1-(((1+g)/(1+discount))**n))
+
+def perpetuity(cf0,g,discount):
+    return (cf0*(1+g)) / (discount-g)
+
+def fv(cf,rate,periods):
+    return cf * ((1+rate)**periods)
+    
+def calculator():
+    type = input("Do you need to calculate a present of future value? (pv/fv)")
+    currentCF = 0
+    currentPV = 0
+    currentPeriod = 0
+    if type ==  "pv":
+        print("present value calculator")
+        discount = float(input("What is the discount rate? (as a decimal)"))
+        discrete = int(input("How many discrete forecast periods?"))
+        growth = int(input("How many growth phases?"))
+        for i in range(1, discrete+1):
+            currentPeriod += 1
+            cf=float(input("What is your cash flow in period " + str(currentPeriod) + "?"))
+            currentCF=cf
+            currentPV += pv(cf,discount,currentPeriod)
+        print("PV Discrete Forecast: $" + str(currentPV))
+        for i in range(1, growth +1):
+            phasePV = 0
+            if i != growth:
+                growthPeriod = int(input("How many years is the growth phase?"))
+                growthRate = float(input("What is the growth rate of the phase? (as a decimal)"))
+                value = annuity(currentCF,growthRate,discount,growthPeriod)
+                currentPV += pv(value, discount, currentPeriod)
+                phasePV += pv(value, discount, currentPeriod)
+                currentPeriod+=growthPeriod
+                for i in range(growthPeriod):
+                    currentCF *= (1+growthRate)
+                print("PV Phase " + str(i) + " Annuity: $" + str(phasePV))
+            else:
+                final = input("Is the last phase an annuity or a perpetuity?")
+                if final == "annuity":
+                    growthPeriod = int(input("How many years is the growth phase?"))
+                    growthRate = float(input("What is the growth rate of the phase? (as a decimal)"))
+                    value = annuity(currentCF,growthRate,discount,growthPeriod)
+                    currentPV += pv(value, discount, currentPeriod)
+                    phasePV += pv(value, discount, currentPeriod)
+                    currentPeriod += growthPeriod
+                    for i in range(growthPeriod):
+                        currentCF *= (1+growthRate)
+                    print("PV Phase " + str(i) + " Annuity: $" + str(phasePV))
+                if final == "perpetuity":
+                    growthRate = float(input("What is the growth rate of the perpetuity? (as a decimal)"))
+                    value = perpetuity(currentCF, growthRate, discount)
+                    currentPV += pv(value, discount, currentPeriod)
+                    phasePV += pv(value, discount, currentPeriod)
+                    print("PV Phase " + str(i) + " Perpetuity: $" + str(phasePV))
+        print("Total PV = $: " + str(currentPV))
+    elif type == "fv":
+        print("future value calculator")
+        rate = float(input("What is the interest rate? (as a decimal)"))
+        discrete = int(input("How many discrete forecast periods?"))
+        growth = int(input("How many growth periods?"))
+        currentPeriod=1
+        currentCF = 0
+        totalCF = []
+        for i in range(1, discrete+1):
+            currentCF = float(input("What is the cash flow in period " + str(i) + "?"))
+            totalCF.append(currentCF)
+            print(totalCF)
+            currentPeriod += 1
+        for i in range(1, growth +1):
+            growthPeriod = int(input("How many years is the growth phase?"))
+            growthRate = float(input("What is the growth rate of the phase? (as a decimal)"))
+            for i in range(1,growthPeriod +1):
+                currentCF *= (1+growthRate)
+                totalCF.append(currentCF)
+                currentPeriod += 1
+        futureValue = 0
+        for i in range(0,currentPeriod-1):
+            yearsCompounding = currentPeriod -1 - i
+            future = fv(totalCF[i],rate,yearsCompounding)
+            futureValue += future
+        print(f"Your future value is ${futureValue:.02f} in {currentPeriod-1} years")
+    else:
+        print("Invalid input. Please try again")
+        return
+calculator()
